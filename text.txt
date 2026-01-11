@@ -1,0 +1,569 @@
+
+// --- Design Constants ---
+const PRIMARY_COLOR = 'bg-teal-700';
+const VIEW_CONFIG = {
+  qa: { textKey: 'tab_qa', icon: '💬', button: 'bg-sky-500 hover:bg-sky-600' },
+  drug: { textKey: 'tab_drug', icon: '💊', button: 'bg-emerald-500 hover:bg-emerald-600' },
+  lab: { textKey: 'tab_lab', icon: '🔬', button: 'bg-indigo-500 hover:bg-indigo-600' },
+  pregnancy: { textKey: 'tab_pregnancy', icon: '🤰', button: 'bg-amber-500 hover:bg-amber-600' },
+  doctors: { textKey: 'tab_doctors', icon: '👨‍⚕️', button: 'bg-rose-500 hover:bg-rose-600' },
+  donation: { textKey: 'tab_donation', icon: '❤️', button: 'bg-red-500 hover:bg-red-600' },
+};
+
+const UI_TEXT = {
+  ku: {
+    app_title: "iDoctors",
+    tab_qa: "گفتوگۆ (AI)",
+    tab_drug: "دەرمان",
+    tab_lab: "فەحس (AI)",
+    tab_pregnancy: "دووگیانی",
+    tab_doctors: "دکتۆرەکان",
+    tab_donation: "بەخشین",
+    drug_search_title: "ناوی دەرمانەکان",
+    drug_pharmacy_title: "ناونیشانی دەرمانخانەکان",
+    drug_rx_title: "خوێندنەوەی ڕەچەتە",
+    lab_analyze_title: "خوێندنەوەی فەحس (AI)",
+    lab_prompt: "وێنەی فەحسەکە لێرە دابنێ بۆ شیکردنەوەی تەواو",
+    lab_address_title: "ناونیشانی تاقیگەکان",
+    lab_address_status: "ناونیشانی هەرزانترین تاقیگەیەکان بەم زوانە بەردەست دەبیت",
+    preg_weeks_title: "هەفتەکانی دووگیانی (AI)",
+    preg_gender_title: "دیاریکردنی ڕەگەز (AI)",
+    preg_date_placeholder: "ڕێکەوتی کۆتا سووڕی مانگانە هەڵبژێرە",
+    preg_weeks_btn: "هەژمارکردنی هەفتەکان و زانیاری",
+    preg_gender_btn: "کاتەکانی دیاریکردنی ڕەگەز",
+    docs_search_title: "گەڕان بەدوای دکتۆر",
+    docs_placeholder: "ناوی دکتۆر یان پسپۆڕی بنووسە...",
+    docs_btn: "گەڕان بۆ پزیشک ✨",
+    docs_online_title: "دکتۆری ئۆنلاین (AI)",
+    docs_booking_title: "نۆرەگرتن",
+    docs_booking_status: "بە زووترین کات بەردەست دەبێت",
+    placeholder_drug: "ناوی دەرمانەکە لێرە بنووسە...",
+    pharmacy_status: "ناونیشانی هەرزانترین دەرمانخانەکان بەم زووانە بەردەست دەبێت...",
+    rx_prompt: "وێنەی ڕەچەتەکە لێرە دابنێ",
+    loading: "تکایە چاوەڕێ بە...",
+    error: "هەڵەیەک ڕوویدا لە پەیوەندی کردن.",
+    disclaimer: "تێبینی: ئەم ئەپلیکەیشنە تەنها بۆ زانیارییە و جێگرەوەی ڕاوێژی پزیشکی نییە.",
+    visitor_count_label: "ژمارەی سەردانیکەران:",
+  },
+  ar: {
+    app_title: "iDoctors",
+    tab_qa: "دردشة (AI)",
+    tab_drug: "الأدوية",
+    tab_lab: "التحاليل (AI)",
+    tab_pregnancy: "الحمل",
+    tab_doctors: "الأطباء",
+    tab_donation: "التبرع",
+    drug_search_title: "أسماء الأدوية",
+    drug_pharmacy_title: "عناوين الصيدليات",
+    drug_rx_title: "قراءة الروشتة",
+    lab_analyze_title: "قراءة التحليل (AI)",
+    lab_prompt: "ضع صورة التحليل هنا للتحليل الكامل",
+    lab_address_title: "عناوين المختبرات",
+    lab_address_status: "عناوين أرخص المختبرات ستتوفر قريباً",
+    preg_weeks_title: "أسابيع الحمل (AI)",
+    preg_gender_title: "تحديد الجنس (AI)",
+    preg_date_placeholder: "اختر تاريخ آخر دورة شهرية",
+    preg_weeks_btn: "حساب الأسابيع والمعلومات",
+    preg_gender_btn: "أوقات تحديد الجنس",
+    docs_search_title: "البحث عن طبيب",
+    docs_placeholder: "اكتب اسم الطبيب أو الاختصاص...",
+    docs_btn: "بحث عن طبيب ✨",
+    docs_online_title: "طبيب أونلاين (AI)",
+    docs_booking_title: "الحجز",
+    docs_booking_status: "سيتوفر في أقرب وقت ممكن",
+    placeholder_drug: "اكتب اسم الدواء هنا...",
+    pharmacy_status: "عناوين أرخص الصيدليات ستتوفر قريباً...",
+    rx_prompt: "ضع صورة الروشتة هنا",
+    loading: "يرجى الانتظار...",
+    error: "حدث خطأ في الاتصال.",
+    disclaimer: "ملاحظة: هذا التطبيق للمعلومات فقط وليس بديلاً عن الاستشارة الطبية.",
+    visitor_count_label: "عدد الزوار:",
+  },
+  en: {
+    app_title: "iDoctors",
+    tab_qa: "Chat (AI)",
+    tab_drug: "Medicine",
+    tab_lab: "Lab Test (AI)",
+    tab_pregnancy: "Pregnancy",
+    tab_doctors: "Doctors",
+    tab_donation: "Donation",
+    drug_search_title: "Medicine Names",
+    drug_pharmacy_title: "Pharmacy Addresses",
+    drug_rx_title: "Read Prescription",
+    lab_analyze_title: "Analyze Lab (AI)",
+    lab_prompt: "Drop lab image here for full analysis",
+    lab_address_title: "Lab Addresses",
+    lab_address_status: "Cheapest lab addresses will be available soon",
+    preg_weeks_title: "Pregnancy Weeks (AI)",
+    preg_gender_title: "Gender Detection (AI)",
+    preg_date_placeholder: "Select last menstrual period date",
+    preg_weeks_btn: "Calculate Weeks & Info",
+    preg_gender_btn: "Gender Detection Times",
+    docs_search_title: "Search for Doctor",
+    docs_placeholder: "Enter doctor name or specialty...",
+    docs_btn: "Search for Doctor ✨",
+    docs_online_title: "Online Doctor (AI)",
+    docs_booking_title: "Booking",
+    docs_booking_status: "Will be available soon",
+    placeholder_drug: "Enter medicine name here...",
+    pharmacy_status: "Cheapest pharmacy addresses will be available soon...",
+    rx_prompt: "Drop prescription image here",
+    loading: "Please wait...",
+    error: "A connection error occurred.",
+    disclaimer: "Note: This app is for information only and not a substitute for medical advice.",
+    visitor_count_label: "Visitor Count:",
+  }
+};
+
+const arrayBufferToBase64 = (buffer) => {
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+};
+
+export default function App() {
+  const [currentView, setCurrentView] = useState('qa');
+  const [language, setLanguage] = useState('ku');
+  const [query, setQuery] = useState('');
+  const [response, setResponse] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [imageData, setImageData] = useState(null);
+  const [visitorCount, setVisitorCount] = useState(0);
+  const [chatHistory, setChatHistory] = useState([]);
+
+  const t = (k) => (UI_TEXT[language] && UI_TEXT[language][k]) || k;
+
+  useEffect(() => {
+    const initFirebase = async () => {
+      try {
+        if (typeof __firebase_config === 'undefined') return;
+        const config = JSON.parse(__firebase_config);
+        if (!config.apiKey) return;
+        const app = getApps().length === 0 ? initializeApp(config) : getApps()[0];
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'idoctore-app';
+
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+
+        onAuthStateChanged(auth, (u) => {
+          if (u) {
+            const docRef = doc(db, "artifacts", appId, "public", "data", "app_metrics", "visitor_count");
+            onSnapshot(docRef, (s) => setVisitorCount(s.exists() ? s.data().count : 0));
+            const key = `visited_${new Date().toDateString()}`;
+            if (!localStorage.getItem(key)) {
+              setDoc(docRef, { count: increment(1) }, { merge: true }).then(() => localStorage.setItem(key, 'true'));
+            }
+          }
+        });
+      } catch (e) { console.error(e); }
+    };
+    initFirebase();
+  }, []);
+
+  useEffect(() => {
+    if (currentView === 'doctors' && chatHistory.length === 0) {
+      const startDoctorAI = async () => {
+        setLoading(true);
+        const systemPrompt = `You are a professional medical consultant at iDoctors. 
+        Start the conversation by saying exactly: "سڵاو، پێویستیت بە کام دکتۆرە؟" in Kurdish.
+        Wait for their answer about the specialty. 
+        In the second turn, ask for: (ناوی تەواو، تەمەن، ئایا نەخۆشی درێژخایەنت هەیە؟).
+        After that, proceed like a real doctor asking clinical questions one by one until you reach a medical advice/treatment suggestion.
+        Be polite and professional. Use Central Kurdish.`;
+
+        const payload = {
+          contents: [{ role: 'user', parts: [{ text: "Start the medical consultation flow." }] }],
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+        };
+
+        try {
+          const res = await fetch(`${BASE_URL}${MODEL_NAME_FLASH}:generateContent?key=${API_KEY}`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "سڵاو، چۆن دەتوانم یارمەتیت بدەم؟";
+          setChatHistory([{ role: 'model', text: aiText }]);
+        } catch (e) { console.error(e); } finally { setLoading(false); }
+      };
+      startDoctorAI();
+    }
+  }, [currentView]);
+
+  const handleAIService = async (mode, customQuery = null) => {
+    const activeQuery = customQuery || query;
+    if (!activeQuery.trim() && !imageData) return;
+    setLoading(true); setError(null); setResponse(null);
+    
+    let systemPrompt = `You are a professional medical assistant for iDoctors. Answer in ${language.toUpperCase()}.`;
+    
+    if (mode === 'drug') {
+        systemPrompt += ` Focus: Drug Information. Provide: 1. Full Drug Name, 2. Uses, 3. Side effects, 4. Precautions.`;
+    } else if (mode === 'drug_rx') {
+        systemPrompt += ` Focus: Prescription Analysis. Read text from image, explain medications clearly.`;
+    } else if (mode === 'lab') {
+        systemPrompt += ` Analyze medical lab test results. 1. Name, 2. Result, 3. Comparison, 4. Advice.`;
+    } else if (mode === 'doctors_ai') {
+        systemPrompt = `You are a professional doctor. Flow: 1. Specialty, 2. Info (Name/Age/Chronic), 3. Diagnostic Qs, 4. Final advice. Language: KURDISH.`;
+    } else if (mode === 'pregnancy_weeks') {
+        systemPrompt = `You are a pregnancy expert. The user provides their Last Menstrual Period (LMP) date. Today is ${new Date().toISOString()}.
+        Calculate the current week of pregnancy.
+        Explain: 
+        1. تەمەنی کورپە بە هەفتە و مانگ.
+        2. گۆڕانکارییەکانی کورپە لەم هەفتەیەدا.
+        3. دیاریکردنی ڕۆژی لەدایکبوون (EDD).
+        4. ئامۆژگاری گرنگ بۆ دایکەکە.
+        Answer in Central Kurdish. Be supportive and accurate.`;
+    } else if (mode === 'pregnancy_gender') {
+        systemPrompt = `You are a reproductive health expert. The user provides their Last Menstrual Period (LMP) date. 
+        Based on biological cycles (like Shettles method or ovulation timing), provide:
+        1. کاتی گونجاو بۆ جووتبوون ئەگەر ڕەگەزی کچیان بوێت (تاریخی دەستپێک و کۆتایی).
+        2. کاتی گونجاو بۆ جووتبوون ئەگەر ڕەگەزی کوریان بوێت (تاریخی دەستپێک و کۆتایی).
+        Explain the instructions clearly.
+        Answer in Central Kurdish.`;
+    } else if (mode === 'qa') {
+        systemPrompt = `You are a general medical AI assistant. Answer the user query clearly in ${language.toUpperCase()}.`;
+    } else if (mode === 'donation') {
+        systemPrompt = `Provide information about blood/organ donation based on user query in ${language.toUpperCase()}.`;
+    }
+
+    const payload = {
+        contents: mode === 'doctors_ai' 
+            ? [...chatHistory.map(h => ({ role: h.role, parts: [{ text: h.text }] })), { role: 'user', parts: [{ text: activeQuery }] }]
+            : [{ parts: [{ text: activeQuery || "Analyze this" }, ...(imageData ? [{ inlineData: imageData }] : [])] }],
+        systemInstruction: { parts: [{ text: systemPrompt }] },
+    };
+
+    try {
+      const res = await fetch(`${BASE_URL}${MODEL_NAME_FLASH}:generateContent?key=${API_KEY}`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response.";
+      
+      if (mode === 'doctors_ai') {
+          setChatHistory(prev => [...prev, { role: 'user', text: activeQuery }, { role: 'model', text: aiText }]);
+          setQuery('');
+      } else {
+          setResponse(aiText);
+      }
+    } catch (e) { setError(t('error')); } finally { setLoading(false); }
+  };
+
+  const handleFile = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => setImageData({ data: arrayBufferToBase64(reader.result), mimeType: file.type });
+      reader.readAsArrayBuffer(file);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex justify-center overflow-x-hidden" dir={language === 'en' ? 'ltr' : 'rtl'}>
+      <style dangerouslySetInnerHTML={{__html: `
+        input, textarea, select { font-size: 16px !important; }
+        @viewport { width: device-width; zoom: 1.0; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+      `}} />
+
+      <div className="w-full max-w-md shadow-2xl min-h-screen flex flex-col border-x border-gray-100 bg-white">
+        
+        {/* Header */}
+        <header className={`${PRIMARY_COLOR} pt-10 pb-8 px-6 text-white rounded-b-[40px] shadow-lg relative overflow-hidden`}>
+          {/* Subtle Background Glow */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+          
+          <div className="flex justify-between items-center relative z-10">
+            <h1 className="text-xl font-black flex items-center gap-2">
+              {/* Requested Custom Icon */}
+              <div className="bg-white p-0.5 rounded-lg overflow-hidden flex items-center justify-center w-10 h-10 shadow-sm">
+                <img src="https://i.ibb.co/nN9nYZ1q/IMG-1261.png" alt="iDoctors Logo" className="w-full h-full object-contain" />
+              </div>
+              {t('app_title')}
+            </h1>
+            
+            {/* Language Switcher */}
+            <div className="flex bg-white/10 backdrop-blur-xl border border-white/20 p-1 rounded-2xl shadow-inner">
+              {['ku', 'ar', 'en'].map(l => (
+                  <button 
+                    key={l} 
+                    onClick={() => setLanguage(l)} 
+                    className={`
+                      relative px-3 py-1.5 text-[10px] font-black rounded-xl transition-all duration-300
+                      ${language === l 
+                        ? 'bg-white text-teal-800 shadow-[0_0_15px_rgba(255,255,255,0.4)] scale-105 z-10' 
+                        : 'text-white/60 hover:text-white hover:bg-white/5'
+                      }
+                    `}
+                  >
+                      {l.toUpperCase()}
+                      {language === l && (
+                        <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-teal-800 rounded-full"></span>
+                      )}
+                  </button>
+              ))}
+            </div>
+          </div>
+        </header>
+
+        {/* Navigation */}
+        <nav className="flex overflow-x-auto px-4 py-4 gap-2 no-scrollbar bg-white sticky top-0 z-10 shadow-sm border-b">
+          {Object.keys(VIEW_CONFIG).map(v => (
+            <button 
+                key={v} onClick={() => { setCurrentView(v); setResponse(null); setQuery(''); setImageData(null); }}
+                className={`flex-shrink-0 px-4 py-2 rounded-xl text-[10px] font-black transition-all flex items-center gap-2 ${currentView === v ? 'bg-teal-800 text-white shadow-md' : 'bg-gray-100 text-gray-500'}`}
+            >
+                <span>{VIEW_CONFIG[v].icon}</span> {t(VIEW_CONFIG[v].textKey)}
+            </button>
+          ))}
+        </nav>
+
+        {/* Content */}
+        <main className="flex-grow p-4 space-y-6">
+          
+          {/* Drug View */}
+          {currentView === 'drug' && (
+            <div className="space-y-6 animate-in fade-in duration-500">
+              <div className="bg-white rounded-[30px] p-6 shadow-sm border border-emerald-100 space-y-4">
+                <div className="flex items-center gap-3 mb-2 border-b border-emerald-50 pb-3">
+                  <span className="p-2 bg-emerald-100 text-emerald-600 rounded-xl">🔍</span>
+                  <h3 className="font-black text-emerald-800 text-sm">{t('drug_search_title')}</h3>
+                </div>
+                <input type="text" className="w-full p-4 bg-gray-50 rounded-2xl border-none font-bold shadow-inner" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('placeholder_drug')} />
+                <button onClick={() => handleAIService('drug')} className="w-full py-4 bg-emerald-500 text-white rounded-2xl font-black text-xs">{language === 'ku' ? 'دۆزینەوەی زانیاری دەرمان ✨' : language === 'ar' ? 'البحث عن معلومات الدواء ✨' : 'Find Drug Info ✨'}</button>
+              </div>
+
+              <div className="bg-white rounded-[30px] p-6 shadow-sm border border-sky-100 space-y-4">
+                <div className="flex items-center gap-3 mb-2 border-b border-sky-50 pb-3">
+                  <span className="p-2 bg-sky-100 text-sky-600 rounded-xl">📸</span>
+                  <h3 className="font-black text-sky-800 text-sm">{t('drug_rx_title')}</h3>
+                </div>
+                <label className="block w-full py-8 bg-sky-50 text-sky-700 rounded-3xl border-2 border-dashed border-sky-200 cursor-pointer text-center">
+                  {imageData ? (language === 'ku' ? "وێنەکە ئامادەیە ✅" : language === 'ar' ? "الصورة جاهزة ✅" : "Image ready ✅") : t('rx_prompt')}
+                  <input type="file" accept="image/*" className="hidden" onChange={handleFile} />
+                </label>
+                {imageData && <button onClick={() => handleAIService('drug_rx')} className="w-full py-4 bg-sky-600 text-white rounded-2xl font-black text-xs">{language === 'ku' ? 'شیکردنەوەی ڕەچەتە بە AI' : language === 'ar' ? 'تحليل الروشتة بـ AI' : 'Analyze Rx with AI'}</button>}
+              </div>
+
+              <div className="bg-white rounded-[30px] p-6 shadow-sm border border-amber-100 text-center space-y-4">
+                <div className="flex items-center gap-3 mb-2 border-b border-amber-50 pb-3">
+                  <span className="p-2 bg-amber-100 text-amber-600 rounded-xl">📍</span>
+                  <h3 className="font-black text-amber-800 text-sm">{t('drug_pharmacy_title')}</h3>
+                </div>
+                <p className="text-[11px] font-bold text-gray-500 p-4 bg-amber-50/50 rounded-2xl">{t('pharmacy_status')}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Lab View */}
+          {currentView === 'lab' && (
+            <div className="space-y-6 animate-in fade-in duration-500">
+              <div className="bg-white rounded-[30px] p-6 shadow-sm border border-indigo-100 space-y-4">
+                <div className="flex items-center gap-3 mb-2 border-b border-indigo-50 pb-3">
+                  <span className="p-2 bg-indigo-100 text-indigo-600 rounded-xl">🔬</span>
+                  <h3 className="font-black text-indigo-800 text-sm">{t('lab_analyze_title')}</h3>
+                </div>
+                <label className="block w-full py-8 bg-indigo-50 text-indigo-700 rounded-3xl border-2 border-dashed border-indigo-200 cursor-pointer hover:bg-indigo-100 transition-colors text-center">
+                  {imageData ? (
+                    <div className="space-y-2">
+                      <span className="text-2xl">✅</span>
+                      <p className="font-black text-[10px]">{language === 'ku' ? 'وێنەی فەحسەکە ئامادەیە' : language === 'ar' ? 'صورة التحليل جاهزة' : 'Lab image ready'}</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <span className="text-3xl">📄</span>
+                      <p className="font-black text-[10px]">{t('lab_prompt')}</p>
+                    </div>
+                  )}
+                  <input type="file" accept="image/*" className="hidden" onChange={handleFile} />
+                </label>
+                <button 
+                  onClick={() => handleAIService('lab')} 
+                  className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs shadow-lg active:scale-95 transition-transform"
+                >
+                  {language === 'ku' ? 'شیکردنەوەی ئۆتۆماتیکی فەحس 🤖' : language === 'ar' ? 'تحليل التحاليل آلياً 🤖' : 'Auto Lab Analysis 🤖'}
+                </button>
+              </div>
+
+              <div className="bg-white rounded-[30px] p-6 shadow-sm border border-purple-100 text-center space-y-4">
+                <div className="flex items-center gap-3 mb-2 border-b border-purple-50 pb-3 text-right">
+                  <span className="p-2 bg-purple-100 text-purple-600 rounded-xl">📍</span>
+                  <h3 className="font-black text-purple-800 text-sm">{t('lab_address_title')}</h3>
+                </div>
+                <p className="text-[11px] font-bold text-gray-500 leading-relaxed bg-purple-50/50 p-4 rounded-2xl border border-purple-50">
+                  {t('lab_address_status')}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Doctors View */}
+          {currentView === 'doctors' && (
+            <div className="space-y-6 animate-in fade-in duration-500">
+              <div className="bg-white rounded-[30px] p-6 shadow-sm border border-rose-100 space-y-4">
+                <div className="flex items-center gap-3 mb-2 border-b border-rose-50 pb-3">
+                  <span className="p-2 bg-rose-100 text-rose-600 rounded-xl">🔍</span>
+                  <h3 className="font-black text-rose-800 text-sm">{t('docs_search_title')}</h3>
+                </div>
+                <input type="text" className="w-full p-4 bg-gray-50 rounded-2xl border-none font-bold" placeholder={t('docs_placeholder')} />
+                <button className="w-full py-4 bg-rose-500 text-white rounded-2xl font-black text-xs">{t('docs_btn')}</button>
+              </div>
+
+              <div className="bg-white rounded-[30px] p-6 shadow-sm border border-sky-100 space-y-4">
+                <div className="flex items-center gap-3 mb-2 border-b border-sky-50 pb-3">
+                  <span className="p-2 bg-sky-100 text-sky-600 rounded-xl text-xl">👶🩺</span>
+                  <h3 className="font-black text-sky-800 text-sm">{t('docs_online_title')}</h3>
+                </div>
+                <div className="bg-gray-50 rounded-2xl p-4 min-h-[200px] max-h-[300px] overflow-y-auto space-y-3 no-scrollbar border border-gray-100">
+                  {chatHistory.map((chat, i) => (
+                    <div key={i} className={`flex ${chat.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-[85%] p-3 rounded-2xl text-[11px] font-bold shadow-sm ${chat.role === 'user' ? 'bg-sky-500 text-white rounded-tr-none' : 'bg-white text-gray-700 rounded-tl-none border border-sky-50'}`}>
+                        {chat.text}
+                      </div>
+                    </div>
+                  ))}
+                  {loading && <div className="text-[10px] font-bold text-gray-400 animate-pulse">{language === 'ku' ? 'دکتۆر وەڵام دەداتەوە...' : language === 'ar' ? 'الطبيب يجيب...' : 'Doctor is replying...'}</div>}
+                </div>
+                <div className="flex gap-2">
+                  <input type="text" className="flex-grow p-4 bg-gray-100 rounded-2xl border-none font-bold text-xs" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={language === 'ku' ? 'لێرە بنووسە...' : language === 'ar' ? 'اكتب هنا...' : 'Write here...'} onKeyPress={(e) => e.key === 'Enter' && handleAIService('doctors_ai')} />
+                  <button onClick={() => handleAIService('doctors_ai')} className="p-4 bg-sky-600 text-white rounded-2xl shadow-md active:scale-90 transition-transform">📤</button>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-[30px] p-6 shadow-sm border border-gray-100 text-center space-y-2">
+                <h3 className="font-black text-gray-800 text-sm">{t('docs_booking_title')}</h3>
+                <p className="text-[10px] font-bold text-gray-400">{t('docs_booking_status')}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Pregnancy View */}
+          {currentView === 'pregnancy' && (
+            <div className="space-y-6 animate-in fade-in duration-500">
+              <div className="bg-white rounded-[35px] p-6 shadow-md border border-amber-100 space-y-6">
+                <div className="text-center space-y-2">
+                  <h3 className="font-black text-gray-800 text-sm">{language === 'ku' ? 'بەشی خزمەتگوزاری دووگیانی (AI)' : language === 'ar' ? 'قسم خدمات الحمل (AI)' : 'Pregnancy Service (AI)'}</h3>
+                  <p className="text-[10px] text-gray-400 font-bold">{language === 'ku' ? 'تکایە ڕێکەوتی کۆتا سووڕی مانگانەت لێرە دیاری بکە' : language === 'ar' ? 'يرجى تحديد تاريخ آخر دورة شهرية هنا' : 'Please select your LMP date here'}</p>
+                </div>
+                
+                <div className="relative">
+                  <input 
+                    type="date" 
+                    className="w-full p-5 bg-gray-50 rounded-[25px] border-none font-bold shadow-inner text-center text-teal-700 appearance-none" 
+                    value={query} 
+                    onChange={(e) => setQuery(e.target.value)} 
+                  />
+                  {!query && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-gray-400 font-bold text-xs">
+                      {t('preg_date_placeholder')}
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 gap-4">
+                  <button onClick={() => handleAIService('pregnancy_weeks')} className="flex items-center justify-between px-6 py-4 bg-amber-500 text-white rounded-2xl font-black text-xs shadow-lg active:scale-95 transition-transform">
+                    <span className="flex items-center gap-2">📅 {t('preg_weeks_btn')}</span>
+                    <span className="text-xs">🤖</span>
+                  </button>
+                  <button onClick={() => handleAIService('pregnancy_gender')} className="flex items-center justify-between px-6 py-4 bg-pink-500 text-white rounded-2xl font-black text-xs shadow-lg active:scale-95 transition-transform">
+                    <span className="flex items-center gap-2">🧬 {t('preg_gender_btn')}</span>
+                    <span className="text-xs">✨</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-100 flex items-start gap-3">
+                <span className="text-xl">💡</span>
+                <p className="text-[10px] font-bold text-blue-800 leading-relaxed">
+                  {language === 'ku' ? 'زیرەکی دەستکرد بە شێوەیەکی ئۆتۆماتیکی تەمەنی منداڵ، کاتی لەدایکبوون و ڕێنمایی ڕەگەز هەژمار دەکات.' : language === 'ar' ? 'الذكاء الاصطناعي يحسب عمر الجنين، موعد الولادة وتوجيهات الجنس آلياً.' : 'AI automatically calculates fetal age, delivery date, and gender guidance.'}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Donation View */}
+          {currentView === 'donation' && (
+            <div className="space-y-6 animate-in fade-in duration-500">
+              <div className="bg-white rounded-[35px] p-8 shadow-md border border-red-100 text-center space-y-6">
+                <div className="p-4 bg-red-50 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-2">
+                    <span className="text-4xl">❤️</span>
+                </div>
+                
+                <h2 className="text-xl font-black text-gray-800">{t('tab_donation')}</h2>
+                
+                <div className="space-y-4 text-right px-2">
+                    <p className="text-sm font-bold text-gray-700 leading-relaxed">
+                        {language === 'ku' ? 'بۆ یارمەتیدانی نەخۆشییە درێژخایەنەکان و هاوکاریکردنی ئارەزوومەندانە.' : language === 'ar' ? 'لمساعدة المرضى ذوي الأمراض المزمنة والمساعدة التطوعية.' : 'To help chronic patients and voluntary assistance.'}
+                    </p>
+                    
+                    <div className="p-6 bg-gray-50 rounded-[25px] border border-red-50 space-y-3">
+                        <p className="text-xs font-black text-red-600">{language === 'ku' ? 'بۆ یارمەتیدان لە ڕێگەی FIB:' : language === 'ar' ? 'للمساعدة عبر FIB:' : 'To help via FIB:'}</p>
+                        <div className="text-lg font-black text-teal-700 tracking-wider">
+                            07503055949
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-red-500/10 p-4 rounded-2xl">
+                    <p className="text-[10px] font-bold text-red-700">{language === 'ku' ? 'بەخشینەکەت دەبێتە هۆکاری ڕزگارکردنی ژیانی کەسێک.' : language === 'ar' ? 'تبرعك سيكون سبباً لإنقاذ حياة شخص ما.' : 'Your donation will be a reason to save someone\'s life.'}</p>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-[30px] p-6 shadow-sm border border-gray-100">
+                <p className="text-[10px] font-bold text-gray-500 mb-4 text-center">{language === 'ku' ? 'پرسیارێکت هەیە دەربارەی بەخشین؟' : language === 'ar' ? 'هل لديك سؤال حول التبرع؟' : 'Have a question about donation?'}</p>
+                <textarea className="w-full p-4 bg-gray-50 rounded-2xl border-none font-bold shadow-inner text-xs" rows="3" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={language === 'ku' ? 'لێرە بنووسە...' : language === 'ar' ? 'اكتب هنا...' : 'Write here...'} />
+                <button onClick={() => handleAIService('donation')} className="w-full mt-3 py-4 bg-red-500 text-white rounded-2xl font-black text-xs shadow-lg">{language === 'ku' ? 'ناردنی پرسیار' : language === 'ar' ? 'إرسال السؤال' : 'Send Question'}</button>
+              </div>
+            </div>
+          )}
+
+          {/* QA View */}
+          {currentView === 'qa' && (
+            <div className="space-y-4 animate-in fade-in duration-500">
+              <div className="bg-white rounded-[35px] p-6 shadow-md border border-gray-100">
+                <textarea className="w-full p-5 bg-gray-50 rounded-[25px] border-none font-bold shadow-inner" rows="4" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t(VIEW_CONFIG[currentView].textKey)} />
+                <button onClick={() => handleAIService(currentView)} className={`w-full mt-4 py-4 rounded-2xl text-white font-black shadow-lg ${VIEW_CONFIG[currentView].button}`}>{t(VIEW_CONFIG[currentView].textKey)}</button>
+              </div>
+            </div>
+          )}
+
+          {/* General Results Display */}
+          {loading && (
+            <div className="flex flex-col items-center justify-center p-10 animate-pulse">
+                <div className="w-12 h-12 border-4 border-teal-200 border-t-teal-600 rounded-full animate-spin mb-4"></div>
+                <p className="font-black text-teal-700 text-sm">{t('loading')}</p>
+            </div>
+          )}
+          
+          {response && (
+            <div className="mt-4 p-6 bg-white border border-teal-50 rounded-[35px] shadow-xl animate-in slide-in-from-bottom-5 duration-500">
+                <div className="flex items-center gap-2 mb-4 border-b border-gray-0 pb-2">
+                    <span className="text-teal-500">✨</span>
+                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{language === 'ku' ? 'وەڵامی زیرەکی دەستکرد' : language === 'ar' ? 'إجابة الذكاء الاصطناعي' : 'AI Response'}</span>
+                </div>
+                <p className="text-sm leading-relaxed text-gray-700 whitespace-pre-wrap font-medium">{response}</p>
+            </div>
+          )}
+
+          {error && <div className="p-4 bg-red-50 text-red-600 rounded-2xl text-center text-xs font-bold border border-red-100">{error}</div>}
+        </main>
+
+        {/* Footer */}
+        <footer className="p-8 text-center bg-gray-50 border-t border-gray-100 mt-auto">
+            <div className="bg-white inline-flex items-center gap-4 px-4 py-2 rounded-full shadow-sm mb-4 border border-gray-100">
+                <span className="text-[10px] font-black text-gray-400">{t('visitor_count_label')}</span>
+                <span className="text-sm font-black text-teal-700">{visitorCount}</span>
+            </div>
+            <p className="text-[8px] text-gray-400 italic px-6 leading-tight">{t('disclaimer')}</p>
+        </footer>
+      </div>
+    </div>
+  );
+}
