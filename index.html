@@ -1,4 +1,237 @@
+import React, { useState, useEffect } from 'react';
+import { initializeApp, getApps } from 'firebase/app';
+import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, doc, setDoc, increment, onSnapshot } from 'firebase/firestore';
 
+/**
+ * iDoctors - Medical AI Assistant
+ * Final Version for GitHub Deployment.
+ */
+
+// --- Global Constants ---
+const MODEL_NAME_FLASH = "gemini-2.5-flash-preview-09-2025";
+const API_KEY = ""; // لێرە کلیلەکەت دابنێ بۆ ئەوەی AI کار بکات
+const BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/";
+const APP_ICON_URL = "https://i.ibb.co/zhGP9H13/IMG-1261.png";
+
+// --- Design Configuration ---
+const PRIMARY_COLOR = 'bg-teal-700';
+const VIEW_CONFIG = {
+  qa: { textKey: 'tab_qa', icon: '💬', button: 'bg-sky-500 hover:bg-sky-600' },
+  drug: { textKey: 'tab_drug', icon: '💊', button: 'bg-emerald-500 hover:bg-emerald-600' },
+  lab: { textKey: 'tab_lab', icon: '🔬', button: 'bg-indigo-500 hover:bg-indigo-600' },
+  pregnancy: { textKey: 'tab_pregnancy', icon: '🤰', button: 'bg-amber-500 hover:bg-amber-600' },
+  doctors: { textKey: 'tab_doctors', icon: '👨‍⚕️', button: 'bg-rose-500 hover:bg-rose-600' },
+  donation: { textKey: 'tab_donation', icon: '❤️', button: 'bg-red-500 hover:bg-red-600' },
+};
+
+const UI_TEXT = {
+  ku: {
+    app_title: "iDoctors",
+    tab_qa: "گفتوگۆ (AI)",
+    tab_drug: "دەرمان",
+    tab_lab: "فەحس (AI)",
+    tab_pregnancy: "دووگیانی",
+    tab_doctors: "دکتۆرەکان",
+    tab_donation: "بەخشین",
+    drug_search_title: "ناوی دەرمانەکان",
+    drug_pharmacy_title: "ناونیشانی دەرمانخانەکان",
+    drug_rx_title: "خوێندنەوەی ڕەچەتە",
+    lab_analyze_title: "خوێندنەوەی فەحس (AI)",
+    lab_prompt: "وێنەی فەحسەکە لێرە دابنێ بۆ شیکردنەوەی تەواو",
+    lab_address_title: "ناونیشانی تاقیگەکان",
+    lab_address_status: "ناونیشانی هەرزانترین تاقیگەیەکان بەم زوانە بەردەست دەبیت",
+    preg_weeks_title: "هەفتەکانی دووگیانی (AI)",
+    preg_gender_title: "دیاریکردنی ڕەگەز (AI)",
+    preg_date_placeholder: "ڕێکەوتی کۆتا سووڕی مانگانە هەڵبژێرە",
+    preg_weeks_btn: "هەژمارکردنی هەفتەکان و زانیاری",
+    preg_gender_btn: "کاتەکانی دیاریکردنی ڕەگەز",
+    docs_search_title: "گەڕان بەدوای دکتۆر",
+    docs_placeholder: "ناوی دکتۆر یان پسپۆڕی بنووسە...",
+    docs_btn: "گەڕان بۆ پزیشک ✨",
+    docs_online_title: "دکتۆری ئۆنلاین (AI)",
+    docs_booking_title: "نۆرەگرتن",
+    docs_booking_status: "بە زووترین کات بەردەست دەبێت",
+    placeholder_drug: "ناوی دەرمانەکە لێرە بنووسە...",
+    pharmacy_status: "ناونیشانی هەرزانترین دەرمانخانەکان بەم زووانە بەردەست دەبێت...",
+    rx_prompt: "وێنەی ڕەچەتەکە لێرە دابنێ",
+    loading: "تکایە چاوەڕێ بە...",
+    error: "هەڵەیەک ڕوویدا لە پەیوەندی کردن.",
+    disclaimer: "تێبینی: ئەم ئەپلیکەیشنە تەنها بۆ زانیارییە و جێگرەوەی ڕاوێژی پزیشکی نییە.",
+    visitor_count_label: "ژمارەی سەردانیکەران:",
+  },
+  ar: {
+    app_title: "iDoctors",
+    tab_qa: "دردشة (AI)",
+    tab_drug: "الأدوية",
+    tab_lab: "التحاليل (AI)",
+    tab_pregnancy: "الحمل",
+    tab_doctors: "الأطباء",
+    tab_donation: "التبرع",
+    drug_search_title: "أسماء الأدوية",
+    drug_pharmacy_title: "عناوين الصيدليات",
+    drug_rx_title: "قراءة الروشتة",
+    lab_analyze_title: "قراءة التحليل (AI)",
+    lab_prompt: "ضع صورة التحليل هنا للتحليل الكامل",
+    lab_address_title: "عناوين المختبرات",
+    lab_address_status: "عناوين أرخص المختبرات ستتوفر قريباً",
+    preg_weeks_title: "أسابيع الحمل (AI)",
+    preg_gender_title: "تحديد الجنس (AI)",
+    preg_date_placeholder: "اختر تاريخ آخر دورة شهرية",
+    preg_weeks_btn: "حساب الأسابيع والمعلومات",
+    preg_gender_btn: "أوقات تحديد الجنس",
+    docs_search_title: "البحث عن طبيب",
+    docs_placeholder: "اكتب اسم الطبيب أو الاختصاص...",
+    docs_btn: "بحث عن طبيب ✨",
+    docs_online_title: "طبيب أونلاين (AI)",
+    docs_booking_title: "الحجز",
+    docs_booking_status: "سيتوفر في أقرب وقت ممكن",
+    placeholder_drug: "اكتب اسم الدواء هنا...",
+    pharmacy_status: "عناوين أرخص الصيدليات ستتوفر قريباً...",
+    rx_prompt: "ضع صورة الروشتة هنا",
+    loading: "يرجى الانتظار...",
+    error: "حدث خطأ في الاتصال.",
+    disclaimer: "ملاحظة: هذا التطبيق للمعلومات فقط وليس بديلاً عن الاستشارة الطبية.",
+    visitor_count_label: "عدد الزوار:",
+  },
+  en: {
+    app_title: "iDoctors",
+    tab_qa: "Chat (AI)",
+    tab_drug: "Medicine",
+    tab_lab: "Lab Test (AI)",
+    tab_pregnancy: "Pregnancy",
+    tab_doctors: "Doctors",
+    tab_donation: "Donation",
+    drug_search_title: "Medicine Names",
+    drug_pharmacy_title: "Pharmacy Addresses",
+    drug_rx_title: "Read Prescription",
+    lab_analyze_title: "Analyze Lab (AI)",
+    lab_prompt: "Drop lab image here for full analysis",
+    lab_address_title: "Lab Addresses",
+    lab_address_status: "Cheapest lab addresses will be available soon",
+    preg_weeks_title: "Pregnancy Weeks (AI)",
+    preg_gender_title: "Gender Detection (AI)",
+    preg_date_placeholder: "Select last menstrual period date",
+    preg_weeks_btn: "Calculate Weeks & Info",
+    preg_gender_btn: "Gender Detection Times",
+    docs_search_title: "Search for Doctor",
+    docs_placeholder: "Enter doctor name or specialty...",
+    docs_btn: "Search for Doctor ✨",
+    docs_online_title: "Online Doctor (AI)",
+    docs_booking_title: "Booking",
+    docs_booking_status: "Will be available soon",
+    placeholder_drug: "Enter medicine name here...",
+    pharmacy_status: "Cheapest pharmacy addresses will be available soon...",
+    rx_prompt: "Drop prescription image here",
+    loading: "Please wait...",
+    error: "A connection error occurred.",
+    disclaimer: "Note: This app is for information only and not a substitute for medical advice.",
+    visitor_count_label: "Visitor Count:",
+  }
+};
+
+const arrayBufferToBase64 = (buffer) => {
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+};
+
+export default function App() {
+  const [currentView, setCurrentView] = useState('qa');
+  const [language, setLanguage] = useState('ku');
+  const [query, setQuery] = useState('');
+  const [response, setResponse] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [imageData, setImageData] = useState(null);
+  const [visitorCount, setVisitorCount] = useState(0);
+  const [chatHistory, setChatHistory] = useState([]);
+
+  const t = (k) => (UI_TEXT[language] && UI_TEXT[language][k]) || k;
+
+  // Set Browser Icons
+  useEffect(() => {
+    let link = document.querySelector("link[rel~='icon']") || document.createElement('link');
+    link.rel = 'icon'; link.href = APP_ICON_URL;
+    document.getElementsByTagName('head')[0].appendChild(link);
+  }, []);
+
+  // Firebase Setup
+  useEffect(() => {
+    const initFirebase = async () => {
+      try {
+        if (typeof __firebase_config === 'undefined') return;
+        const config = JSON.parse(__firebase_config);
+        const app = getApps().length === 0 ? initializeApp(config) : getApps()[0];
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'idoctore-app';
+
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+
+        onAuthStateChanged(auth, (u) => {
+          if (u) {
+            const docRef = doc(db, "artifacts", appId, "public", "data", "app_metrics", "visitor_count");
+            onSnapshot(docRef, (s) => setVisitorCount(s.exists() ? s.data().count : 0));
+            const key = `v_v_${new Date().toDateString()}`;
+            if (!localStorage.getItem(key)) {
+              setDoc(docRef, { count: increment(1) }, { merge: true }).then(() => localStorage.setItem(key, '1'));
+            }
+          }
+        });
+      } catch (e) { console.error("Firebase Error:", e); }
+    };
+    initFirebase();
+  }, []);
+
+  const handleAIService = async (mode, customQuery = null) => {
+    const activeQuery = customQuery || query;
+    if (!activeQuery.trim() && !imageData) return;
+    setLoading(true); setError(null); setResponse(null);
+    
+    let systemPrompt = `You are a medical assistant. Answer in ${language.toUpperCase()}.`;
+    if (mode === 'drug') systemPrompt += ` Focus on medicine info.`;
+    else if (mode === 'lab') systemPrompt += ` Analyze medical lab test results.`;
+    else if (mode === 'doctors_ai') systemPrompt = `You are a professional doctor. Use Kurdish.`;
+
+    const payload = {
+        contents: mode === 'doctors_ai' 
+            ? [...chatHistory.map(h => ({ role: h.role, parts: [{ text: h.text }] })), { role: 'user', parts: [{ text: activeQuery }] }]
+            : [{ parts: [{ text: activeQuery || "Analyze image" }, ...(imageData ? [{ inlineData: imageData }] : [])] }],
+        systemInstruction: { parts: [{ text: systemPrompt }] },
+    };
+
+    try {
+      const res = await fetch(`${BASE_URL}${MODEL_NAME_FLASH}:generateContent?key=${API_KEY}`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Error: No response.";
+      
+      if (mode === 'doctors_ai') {
+          setChatHistory(prev => [...prev, { role: 'user', text: activeQuery }, { role: 'model', text: aiText }]);
+          setQuery('');
+      } else {
+          setResponse(aiText);
+      }
+    } catch (e) { setError(t('error')); } finally { setLoading(false); }
+  };
+
+  const handleFile = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => setImageData({ data: arrayBufferToBase64(reader.result), mimeType: file.type });
+      reader.readAsArrayBuffer(file);
+    }
+  };
+
+  return (
     <div className="min-h-screen bg-gray-50 flex justify-center overflow-x-hidden font-sans" dir={language === 'en' ? 'ltr' : 'rtl'}>
       <style dangerouslySetInnerHTML={{__html: `
         input, textarea { font-size: 16px !important; }
